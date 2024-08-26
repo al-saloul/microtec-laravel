@@ -1,0 +1,42 @@
+# Ignore Composer dependencies
+/vendor/
+
+# Ignore environment variables
+.env
+.env.*.backup
+
+# Ignore node dependencies (if applicable)
+/node_modules/
+
+# Ignore compiled files
+/bootstrap/cache/
+storage/*.key
+
+# Ignore cache files
+/.phpunit.result.cache
+/.php_cs.cache
+
+# Ignore IDE or Editor configurations
+.idea/
+.vscode/
+
+# Ignore log files and personal configurations
+*.log
+*.local
+*.cache
+*.env
+
+# Ignore PHPUnit result cache
+.phpunit.result.cache
+
+# Ignore coverage reports
+coverage/
+
+# Ignore composer lock file
+composer.lock
+
+# Ignore MacOS system files
+.DS_Store
+
+# Ignore unnecessary system files
+Thumbs.db
