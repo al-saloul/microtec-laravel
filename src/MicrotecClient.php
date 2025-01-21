@@ -45,4 +45,21 @@ class MicrotecClient
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Syncs the order with the /api/orderV2/SyncOrder endpoint.
+     *
+     * @param array $orderData
+     * @param string $authToken
+     * @return array
+     */
+    public function syncOrderV2($orderData, $authToken)
+    {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => "Bearer $authToken",
+        ])->post("{$this->baseUrl}/api/orderV2/SyncOrder", $orderData);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }

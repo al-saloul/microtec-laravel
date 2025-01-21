@@ -1,6 +1,6 @@
 <?php
 
-namespace Alsaloul\Microtec;
+namespace Alsaloul\Microtec\Data;
 
 class OrderData
 {
