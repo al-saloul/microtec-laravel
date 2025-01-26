@@ -8,97 +8,89 @@ use Alsaloul\Microtec\Data\ReturnOrdersData;
 
 class Microtec
 {
+    private static function authenticateClient()
+    {
+        $microtecClient = new MicrotecClient();
+        $authResponse = $microtecClient->authenticate();
+
+        if (!$authResponse['Success'] ?? false) {
+            throw new \Exception('Authentication failed');
+        }
+
+        return [
+            'client' => $microtecClient,
+            'token' => $authResponse['Data']['Token'],
+        ];
+    }
+
+    private static function syncOrder(array $orderData, string $type)
+    {
+        $authData = self::authenticateClient();
+        $orderData['type'] = $type;
+
+        if ($type === 'Return' && empty($orderData['sourceIntegrationId'])) {
+            throw new \InvalidArgumentException('Missing sourceIntegrationId for return order');
+        }
+
+        foreach ($orderData['products'] as &$product) {
+            if ($type === 'Return' && empty($product['sourceLineId'])) {
+                throw new \InvalidArgumentException('Missing sourceLineId for product in return order');
+            }
+
+            $product['sourceLineId'] ?? null; 
+        }
+        
+        return $authData['client']->syncOrderV2($orderData, $authData['token']);
+    }
+
+    /**
+     * Sends order data to the Microtec system.
+     *
+     * @param OrderData $orderData The order data to be sent.
+     * @return \Illuminate\Http\JsonResponse The response from the Microtec system.
+     */
     public static function sendOrder(OrderData $orderData)
     {
-        $microtecClient = new MicrotecClient();
-        $authResponse = $microtecClient->authenticate();
-
-        $authToken = $authResponse['success'] ?? false ? $authResponse['data']['token'] : null;
-
-        if (!$authToken) {
-            return response()->json(['error' => 'Authentication failed'], 401);
+        try {
+            $orderArray = $orderData->toArray();
+            $response = self::syncOrder($orderArray, 'Order');
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $orderArray = $orderData->toArray();
-        $response = $microtecClient->syncOrder($orderArray, $authToken);
-
-        return response()->json($response);
     }
 
     /**
-     * Send multiple Invoice Orders to the external system for SyncOrder.
+     * Sends invoice orders to the Microtec system.
      *
-     * @param InvoiceOrdersData $ordersData
-     * @return array
+     * @param InvoiceOrdersData $orderData The order data to be sent.
+     * @return \Illuminate\Http\JsonResponse The response from the Microtec system.
      */
-    public static function sendInvoiceOrders(InvoiceOrdersData $ordersData)
+    public static function sendInvoiceOrders(InvoiceOrdersData $orderData)
     {
-        $microtecClient = new MicrotecClient();
-        $authResponse = $microtecClient->authenticate();
-        $authToken = $authResponse['success'] ?? false ? $authResponse['data']['token'] : null;
-
-        if (!$authToken) {
-            return response()->json(['error' => 'Authentication failed'], 401);
+        try {
+            $orderArray = $orderData->toArray();
+            $response = self::syncOrder($orderArray, 'Invoice');
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $responses = [];
-        foreach ($ordersData as $orderData) {
-            $orderData['type'] = 'Invoice';
-
-            $orderData['sourceIntegrationId'] = null;
-            foreach ($orderData['products'] as &$product) {
-                $product['sourceLineId'] = null;
-            }
-
-            $response = $microtecClient->syncOrderV2($orderData, $authToken);
-            $responses[] = $response;
-        }
-
-        return $responses;
     }
-    
+
     /**
-     * Send multiple Return Orders to the external system for SyncOrder.
+     * Sends return orders to the Microtec system.
      *
-     * @param ReturnOrdersData $ordersData
-     * @return array
+     * @param ReturnOrdersData $orderData The order data to be sent.
+     * @return \Illuminate\Http\JsonResponse The response from the Microtec system.
      */
-    public static function sendReturnOrders(ReturnOrdersData $ordersData)
+    public static function sendReturnOrders(ReturnOrdersData $orderData)
     {
-        $microtecClient = new MicrotecClient();
-        $authResponse = $microtecClient->authenticate();
-        $authToken = $authResponse['success'] ?? false ? $authResponse['data']['token'] : null;
-
-        if (!$authToken) {
-            return response()->json(['error' => 'Authentication failed'], 401);
+        try {
+            $orderArray = $orderData->toArray();
+            $response = self::syncOrder($orderArray, 'Return');
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $responses = [];
-        foreach ($ordersData as $orderData) {
-            $orderData['type'] = 'Return';
-
-            if (!isset($orderData['sourceIntegrationId']) || empty($orderData['sourceIntegrationId'])) {
-                $responses[] = [
-                    'error' => 'Missing sourceIntegrationId for return order',
-                    'data' => $orderData
-                ];
-                continue;
-            }
-
-            foreach ($orderData['products'] as &$product) {
-                if (!isset($product['sourceLineId'])) {
-                    $responses[] = [
-                        'error' => 'Missing sourceLineId for product in return order',
-                        'data' => $product
-                    ];
-                    continue 2;
-                }
-            }
-
-            $response = $microtecClient->syncOrderV2($orderData, $authToken);
-            $responses[] = $response;
-        }
-
-        return $responses;
     }
 }

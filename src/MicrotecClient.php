@@ -31,6 +31,7 @@ class MicrotecClient
                 'clientId' => $this->clientId,
                 'securityKey' => $this->securityKey,
             ],
+            'verify' => false,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -41,7 +42,7 @@ class MicrotecClient
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer $authToken",
-        ])->post("{$this->baseUrl}/api/order/SyncOrder", $orderData);
+        ])->withoutVerifying()->post("{$this->baseUrl}/api/order/SyncOrder", $orderData);
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -58,7 +59,7 @@ class MicrotecClient
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer $authToken",
-        ])->post("{$this->baseUrl}/api/orderV2/SyncOrder", $orderData);
+        ])->withoutVerifying()->post("{$this->baseUrl}/api/orderV2/SyncOrder", $orderData);
 
         return json_decode($response->getBody()->getContents(), true);
     }

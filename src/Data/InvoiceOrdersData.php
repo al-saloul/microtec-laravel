@@ -4,44 +4,25 @@ namespace Alsaloul\Microtec\Data;
 
 class InvoiceOrdersData
 {
-    public $id;
-    public $date;
-    public $name;
-    public $phone;
-    public $deliveryPrice;
-    public $totalTax;
-    public $totalPrice;
-    public $totalDiscount;
-    public $deliveryDiscount;
-    public $isDeliveryTaxable;
-    public $referenceId;
-    public $products;
+    protected $attributes = [];
 
-    public function __construct(
-        string $id,
-        string $date,
-        string $name,
-        string $phone,
-        float $deliveryPrice,
-        float $totalTax,
-        float $totalPrice,
-        float $totalDiscount,
-        float $deliveryDiscount,
-        bool $isDeliveryTaxable,
-        string $referenceId,
-        array $products
-    ) {
-        $this->id = $id;
-        $this->date = $date;
-        $this->name = $name;
-        $this->phone = $phone;
-        $this->deliveryPrice = $deliveryPrice;
-        $this->totalTax = $totalTax;
-        $this->totalPrice = $totalPrice;
-        $this->totalDiscount = $totalDiscount;
-        $this->deliveryDiscount = $deliveryDiscount;
-        $this->isDeliveryTaxable = $isDeliveryTaxable;
-        $this->referenceId = $referenceId;
-        $this->products = $products;
+    public function __construct(array $data)
+    {
+        $this->attributes = $data;
+    }
+
+    public function __get($key)
+    {
+        return $this->attributes[$key] ?? null;
+    }
+
+    public function __set($key, $value)
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    public function toArray(): array
+    {
+        return $this->attributes;
     }
 }
