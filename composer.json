@@ -2,6 +2,7 @@
     "name": "alsaloul/microtec",
     "description": "A Laravel package for integrating with the Microtec ERP system.",
     "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Alsaloul\\Microtec\\": "src/"
@@ -9,7 +10,7 @@
     },
     "require": {
         "guzzlehttp/guzzle": "^7.4",
-        "illuminate/support": "^8.0|^9.0|^10.0"
+        "illuminate/support": "*"
     },
     "extra": {
         "laravel": {
